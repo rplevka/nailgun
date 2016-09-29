@@ -276,6 +276,16 @@ class PathTestCase(TestCase):
                 (entities.ContentView, 'copy'),
                 (entities.ContentView, 'publish'),
                 (entities.ContentViewVersion, 'promote'),
+                (entities.Environment, 'smart_class_parameters'),
+                (entities.Host, 'errata'),
+                (entities.Host, 'errata/apply'),
+                (entities.Host, 'puppetclass_ids'),
+                (entities.Host, 'smart_class_parameters'),
+                (entities.Host, 'smart_variables'),
+                (entities.HostGroup, 'clone'),
+                (entities.HostGroup, 'puppetclass_ids'),
+                (entities.HostGroup, 'smart_class_parameters'),
+                (entities.HostGroup, 'smart_variables'),
                 (entities.Organization, 'download_debug_certificate'),
                 (entities.Organization, 'subscriptions'),
                 (entities.Organization, 'subscriptions/delete_manifest'),
@@ -1304,6 +1314,19 @@ class GenericTestCase(TestCase):
                 entities.Organization(**generic).download_debug_certificate,
                 'get'
             ),
+<<<<<<< HEAD
+=======
+            (entities.Host(**generic).add_puppetclass, 'post'),
+            (entities.Host(**generic).errata, 'get'),
+            (entities.Host(**generic).errata_apply, 'put'),
+            (entities.Host(**generic).install_content, 'put'),
+            (entities.Host(**generic).list_scparams, 'get'),
+            (entities.Host(**generic).list_smart_variables, 'get'),
+            (entities.HostGroup(**generic).add_puppetclass, 'post'),
+            (entities.HostGroup(**generic).clone, 'post'),
+            (entities.HostGroup(**generic).list_scparams, 'get'),
+            (entities.HostGroup(**generic).list_smart_variables, 'get'),
+>>>>>>> d589cbb... added helpers for hostgroup clone, fixes #318
             (entities.Product(**generic).sync, 'post'),
             (entities.RHCIDeployment(**generic).deploy, 'put'),
             (entities.Repository(**generic).sync, 'post'),
@@ -1500,6 +1523,66 @@ class HostGroupTestCase(TestCase):
             self.read_pacther.stop()
             self.update_json_patcher.stop()
 
+<<<<<<< HEAD
+=======
+    def test_delete_puppetclass(self):
+        """Check that helper method is sane.
+
+            Assert that:
+
+            * Method has a correct signature.
+            * Method calls `client.*` once.
+            * Method passes the right arguments to `client.*` and special
+                argument 'puppetclass_id' removed from data dict.
+            * Method calls `entities._handle_response` once.
+            * The result of `_handle_response(…)` is the return value.
+
+
+        """
+        entity = self.entity
+        entity.id = 1
+        self.assertEqual(
+            inspect.getargspec(entity.delete_puppetclass),
+            (['self', 'synchronous'], None, 'kwargs', (True,))
+        )
+        kwargs = {
+            'kwarg': gen_integer(),
+            'data': {'puppetclass_id': gen_integer()}
+        }
+        with mock.patch.object(entities, '_handle_response') as handlr:
+            with mock.patch.object(client, 'delete') as client_request:
+                response = entity.delete_puppetclass(**kwargs)
+        self.assertEqual(client_request.call_count, 1)
+        self.assertEqual(len(client_request.call_args[0]), 1)
+        self.assertNotIn('puppetclass_id', client_request.call_args[1]['data'])
+        self.assertEqual(client_request.call_args[1], kwargs)
+        self.assertEqual(handlr.call_count, 1)
+        self.assertEqual(handlr.return_value, response)
+
+    def test_clone_hostgroup(self):
+        """"Test for :meth:`nailgun.entities.HostGroup.clone`
+        Assert that the method is called one with correct argumets
+        """
+        entity = self.entity
+        entity.id = 1
+        self.assertEqual(
+            inspect.getargspec(entity.clone),
+            (['self', 'synchronous'], None, 'kwargs', (True,))
+        )
+        kwargs = {
+            'kwarg': gen_integer(),
+            'data': {'name': gen_string('utf8', 5)}
+        }
+        with mock.patch.object(entities, '_handle_response') as handler:
+            with mock.patch.object(client, 'post') as post:
+                response = entity.clone(**kwargs)
+        self.assertEqual(post.call_count, 1)
+        self.assertEqual(len(post.call_args[0]), 1)
+        self.assertEqual(post.call_args[1], kwargs)
+        self.assertEqual(handler.call_count, 1)
+        self.assertEqual(handler.return_value, response)
+
+>>>>>>> d589cbb... added helpers for hostgroup clone, fixes #318
 
 class HostTestCase(TestCase):
     """Tests for :class:`nailgun.entities.Host`."""
